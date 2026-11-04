@@ -477,6 +477,17 @@ public final class ReadingSession {
             }
         }
 
+        bridge.onFootnotePopover = { [weak self] message in
+            guard let self else { return }
+            Task { @SilveranUIActor in
+                if message.open {
+                    await self.mediaOverlayManager?.pauseForFootnote()
+                } else {
+                    await self.mediaOverlayManager?.resumeAfterFootnote()
+                }
+            }
+        }
+
         bridge.onMediaOverlaySeek = { [weak self] message in
             guard let self else { return }
             Task { @SilveranUIActor in

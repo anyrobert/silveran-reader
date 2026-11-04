@@ -43,6 +43,9 @@ public final class MediaOverlayManager {
     public var isInBackground: Bool = false
     public var backgroundAudioPlayed: Bool = false
 
+    /// Set when a footnote popover paused playback; cleared if playback starts any other way
+    private var resumeAfterFootnoteClose = false
+
     /// Task for delayed page flips during fractional sentence playback
     /// (i.e. when a sentence is half on this page and half on the next)
     private var pageFlipTask: Task<Void, Never>?
@@ -207,6 +210,9 @@ public final class MediaOverlayManager {
 
         let wasPlaying = isPlaying
         isPlaying = state.isPlaying
+        if state.isPlaying {
+            resumeAfterFootnoteClose = false
+        }
         playbackRate = state.playbackRate
         if isInBackground && state.isPlaying {
             backgroundAudioPlayed = true
@@ -496,6 +502,23 @@ public final class MediaOverlayManager {
             debugLog("[MOM] startPlaying() - failed: \(error)")
             disableScreenWakeLock()
         }
+    }
+
+    /// Pause while a footnote popover is open, remembering to resume on close
+    public func pauseForFootnote() async {
+        guard isPlaying else { return }
+        debugLog("[MOM] pauseForFootnote()")
+        await stopPlaying()
+        resumeAfterFootnoteClose = true
+    }
+
+    /// Resume after the footnote popover closes, unless the user started or paused playback meanwhile
+    public func resumeAfterFootnote() async {
+        guard resumeAfterFootnoteClose else { return }
+        resumeAfterFootnoteClose = false
+        guard !isPlaying else { return }
+        debugLog("[MOM] resumeAfterFootnote()")
+        await startPlaying()
     }
 
     public func stopPlaying() async {

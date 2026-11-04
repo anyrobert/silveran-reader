@@ -45,6 +45,11 @@ public struct SentenceSkipMessage: Codable {
     public let direction: String
 }
 
+/// Sent when the footnote popover opens or closes, so readaloud can pause while a note is read
+public struct FootnotePopoverMessage: Codable {
+    public let open: Bool
+}
+
 /// Sent when user double-clicks text to seek audio to that location
 public struct MediaOverlaySeekMessage: Codable {
     public let sectionIndex: Int

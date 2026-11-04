@@ -30,6 +30,9 @@ public final class ReaderCommsBridge {
     /// Notifies when WebView key handling requests sentence skip
     public var onSentenceSkip: ((SentenceSkipMessage) -> Void)?
 
+    /// Notifies when the footnote popover opens or closes
+    public var onFootnotePopover: ((FootnotePopoverMessage) -> Void)?
+
     /// Notifies when user double-clicks text to seek audio (or initial position)
     public var onMediaOverlaySeek: ((MediaOverlaySeekMessage) -> Void)?
 
@@ -119,6 +122,11 @@ public final class ReaderCommsBridge {
     public func sendSwiftSentenceSkip(_ message: SentenceSkipMessage) {
         debugLog("[ReaderCommsBridge] sendSwiftSentenceSkip - direction: \(message.direction)")
         onSentenceSkip?(message)
+    }
+
+    public func sendSwiftFootnotePopover(_ message: FootnotePopoverMessage) {
+        debugLog("[ReaderCommsBridge] sendSwiftFootnotePopover - open: \(message.open)")
+        onFootnotePopover?(message)
     }
 
     /// JS detected a media overlay seek event (double-click or initial position)

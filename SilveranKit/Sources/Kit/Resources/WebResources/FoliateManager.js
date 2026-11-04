@@ -3,6 +3,7 @@ import { Overlayer } from "./foliate-js/overlayer.js";
 import { SpanHighlighter } from "./SpanHighlighter.js";
 import { debugLog } from "./DebugConfig.js";
 import BookmarkManager from "./BookmarkManager.js";
+import { FootnotePopover } from "./FootnotePopover.js";
 
 const getCSS = ({
   lineSpacing = 1.4,
@@ -163,6 +164,14 @@ class FoliateManager {
     console.log("[FoliateManager] Creating BookmarkManager instance");
     return new BookmarkManager();
   })();
+  #footnotePopover = new FootnotePopover({
+    getStyles: () => this.#buildCSS({ marginLeftRight: 0 }),
+    getTheme: () => ({
+      backgroundColor: this.#backgroundColor,
+      foregroundColor: this.#foregroundColor,
+    }),
+    navigate: (href) => this.#view?.goTo(href),
+  });
 
   async open(file) {
     debugLog("FoliateManager", "open() called with file:", file.name);
@@ -196,6 +205,10 @@ class FoliateManager {
       this.#reportPageFlip(detail);
     });
 
+    this.#view.addEventListener("link", (event) => {
+      this.#footnotePopover.handleLink(this.#view.book, event);
+    });
+
     let clickTimer = null;
 
     this.#view.addEventListener("load", ({ detail }) => {
@@ -225,6 +238,10 @@ class FoliateManager {
         });
 
         doc.addEventListener("click", (event) => {
+          if (this.#footnotePopover.isOpen) {
+            return;
+          }
+
           if (clickTimer !== null) {
             clearTimeout(clickTimer);
             clickTimer = null;
@@ -285,6 +302,12 @@ class FoliateManager {
   }
 
   #handleKeyDown(event) {
+    if (event.key === "Escape" && this.#footnotePopover.close()) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return;
 
     const target = event.target;
@@ -696,9 +719,6 @@ class FoliateManager {
       return;
     }
 
-    const mediaActiveClass =
-      this.#view?.book?.media?.activeClass || "epub-media-overlay-active";
-
     debugLog("FoliateManager", "Applying styles to renderer:", {
       fontSize: this.#fontSize,
       fontFamily: this.#fontFamily,
@@ -706,24 +726,7 @@ class FoliateManager {
       foregroundColor: this.#foregroundColor,
     });
 
-    this.#view.renderer.setStyles?.(
-      getCSS({
-        lineSpacing: this.#lineSpacing,
-        textAlign: this.#textAlign,
-        hyphenate: true,
-        mediaActiveClass,
-        fontSize: this.#fontSize,
-        fontFamily: this.#fontFamily,
-        marginLeftRight: this.#marginLeftRight,
-        marginTopBottom: this.#marginTopBottom,
-        wordSpacing: this.#wordSpacing,
-        letterSpacing: this.#letterSpacing,
-        highlightColor: this.#highlightColor,
-        backgroundColor: this.#backgroundColor,
-        foregroundColor: this.#foregroundColor,
-        customCSS: this.#customCSS,
-      }),
-    );
+    this.#view.renderer.setStyles?.(this.#buildCSS());
 
     const flow = this.#scrollingMode ? "scrolled" : "paginated";
     this.#view.renderer.setAttribute("flow", flow);
@@ -746,6 +749,26 @@ class FoliateManager {
     }
 
     this.#view.renderer.render?.();
+  }
+
+  #buildCSS(overrides = {}) {
+    return getCSS({
+      lineSpacing: this.#lineSpacing,
+      textAlign: this.#textAlign,
+      hyphenate: true,
+      mediaActiveClass: this.#view?.book?.media?.activeClass || "epub-media-overlay-active",
+      fontSize: this.#fontSize,
+      fontFamily: this.#fontFamily,
+      marginLeftRight: this.#marginLeftRight,
+      marginTopBottom: this.#marginTopBottom,
+      wordSpacing: this.#wordSpacing,
+      letterSpacing: this.#letterSpacing,
+      highlightColor: this.#highlightColor,
+      backgroundColor: this.#backgroundColor,
+      foregroundColor: this.#foregroundColor,
+      customCSS: this.#customCSS,
+      ...overrides,
+    });
   }
 
   #updateMaxInlineSize() {

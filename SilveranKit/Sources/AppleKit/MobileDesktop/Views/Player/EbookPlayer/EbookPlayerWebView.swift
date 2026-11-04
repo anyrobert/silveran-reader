@@ -409,6 +409,7 @@ private func makeWebViewConfiguration2(
     contentController.add(coordinator, name: "OverlayToggled")
     contentController.add(coordinator, name: "MarginClickNav")
     contentController.add(coordinator, name: "SentenceSkip")
+    contentController.add(coordinator, name: "FootnotePopover")
     contentController.add(coordinator, name: "mediaOverlaySeek")
     contentController.add(coordinator, name: "MediaOverlayProgress")
     contentController.add(coordinator, name: "ElementVisibility")
