@@ -1,23 +1,25 @@
 import Foundation
 
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
 import MediaPlayer
 #endif
 
 #if os(iOS)
 import UIKit
+#elseif os(macOS)
+import AppKit
 #endif
 
 @MainActor
 public final class MediaNowPlayingPresenter: NowPlayingPresenting {
-    #if os(iOS)
+    #if os(iOS) || os(macOS)
     private var cachedArtworkData: Data?
     private var cachedArtwork: MPMediaItemArtwork?
     #endif
 
     public nonisolated init() {}
 
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
     public func update(_ info: NowPlayingInfo) {
         var nowPlayingInfo = [String: Any]()
 
@@ -33,7 +35,7 @@ public final class MediaNowPlayingPresenter: NowPlayingPresenting {
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] =
             info.isPlaying ? info.playbackRate : 0.0
 
-        #if os(iOS)
+        #if os(iOS) || os(macOS)
         if let artwork = artwork(for: info.artwork) {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
         }
@@ -144,7 +146,7 @@ public final class MediaNowPlayingPresenter: NowPlayingPresenting {
         commandCenter.previousTrackCommand.removeTarget(nil)
     }
 
-    #if os(iOS)
+    #if os(iOS) || os(macOS)
     private func artwork(for data: Data?) -> MPMediaItemArtwork? {
         guard let data else {
             cachedArtworkData = nil
@@ -156,7 +158,11 @@ public final class MediaNowPlayingPresenter: NowPlayingPresenting {
             return cachedArtwork
         }
 
+        #if os(iOS)
         guard let image = UIImage(data: data) else { return nil }
+        #else
+        guard let image = NSImage(data: data) else { return nil }
+        #endif
         let artwork = MPMediaItemArtwork(boundsSize: image.size) { @Sendable _ in image }
         cachedArtworkData = data
         cachedArtwork = artwork

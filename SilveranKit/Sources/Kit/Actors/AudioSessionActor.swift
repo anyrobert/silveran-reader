@@ -1015,7 +1015,9 @@ public actor AudioSessionActor {
 
     private func handleRemoteCommand(_ command: RemoteCommand) async {
         switch command {
-            case .play, .togglePlayPause:
+            case .play:
+                try? await transport(.play)
+            case .togglePlayPause:
                 try? await transport(.togglePlayPause)
             case .pause:
                 try? await transport(.pause)
