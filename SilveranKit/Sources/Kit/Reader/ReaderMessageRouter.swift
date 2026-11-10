@@ -77,6 +77,11 @@ public final class ReaderMessageRouter {
                     let msg = try decoder.decode(SentenceSkipMessage.self, from: data)
                     bridge.sendSwiftSentenceSkip(msg)
 
+                case "FootnotePopover":
+                    let data = try JSONSerialization.data(withJSONObject: body)
+                    let msg = try decoder.decode(FootnotePopoverMessage.self, from: data)
+                    bridge.sendSwiftFootnotePopover(msg)
+
                 case "mediaOverlaySeek":
                     let data = try JSONSerialization.data(withJSONObject: body)
                     let msg = try decoder.decode(MediaOverlaySeekMessage.self, from: data)
