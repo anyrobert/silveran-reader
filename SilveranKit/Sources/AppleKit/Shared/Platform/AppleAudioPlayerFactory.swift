@@ -321,6 +321,10 @@ actor AppleSMILAudioPlayer: AudioPlaying {
 private final class AudioPlayerFinishRelay: NSObject, AVAudioPlayerDelegate, @unchecked Sendable {
     var onFinish: (@Sendable () -> Void)?
 
+    nonisolated override init() {
+        super.init()
+    }
+
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         onFinish?()
     }
