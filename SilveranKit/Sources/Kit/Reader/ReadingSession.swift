@@ -150,6 +150,8 @@ public final class ReadingSession {
 
     public func prepare() {
         debugLog("[ReadingSession] Book: \(metadata.title)")
+        let obsidianBook = ObsidianBookInfo(metadata: metadata)
+        Task { await ObsidianSyncActor.shared.bookStarted(obsidianBook) }
         if category == .ebook {
             debugLog("[ReadingSession] No audio playback mode")
         } else {

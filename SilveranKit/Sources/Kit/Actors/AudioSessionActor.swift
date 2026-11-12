@@ -185,6 +185,9 @@ public actor AudioSessionActor {
     }
 
     public func openAudiobook(book: BookMetadata, mediaURL: URL) async throws {
+        let obsidianBook = ObsidianBookInfo(metadata: book)
+        Task { await ObsidianSyncActor.shared.bookStarted(obsidianBook) }
+
         if self.book?.id == book.id,
             self.mediaURL?.standardizedFileURL == mediaURL.standardizedFileURL,
             metadata != nil

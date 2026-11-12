@@ -124,6 +124,12 @@ public actor BookmarkActor {
         do {
             try await FilesystemActor.shared.saveHighlights(bookID: bookID, highlights: highlights)
             debugLog("[BookmarkActor] saved \(highlights.count) highlights for book \(bookID)")
+            Task {
+                await ObsidianSyncActor.shared.highlightsChanged(
+                    bookID: bookID,
+                    highlights: highlights,
+                )
+            }
         } catch {
             debugLog("[BookmarkActor] saveHighlights failed for \(bookID): \(error)")
         }
