@@ -264,6 +264,12 @@ extension SettingsView {
                         Label("Book Sources", systemImage: "externaldrive")
                     }
                     .tag(SettingsTab.bookSources)
+
+                MacObsidianSettingsView()
+                    .tabItem {
+                        Label("Obsidian", systemImage: "note.text")
+                    }
+                    .tag(SettingsTab.obsidian)
             }
 
             Divider()
@@ -462,6 +468,7 @@ private enum SettingsTab: Hashable {
     case readerSettings
     case readingBar
     case bookSources
+    case obsidian
 }
 
 private struct MacSettingsContainer<Content: View>: View {
