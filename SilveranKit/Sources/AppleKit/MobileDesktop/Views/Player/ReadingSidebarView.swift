@@ -335,12 +335,10 @@ public struct ReadingSidebarView: View {
     }
 
     private var displayedChapterProgress: Double {
-        if model.isPlaying,
-            let audioFraction = chapterAudioFraction(
-                current: progressData?.chapterCurrentSecondsAudio,
-                total: progressData?.chapterTotalSecondsAudio,
-            )
-        {
+        if let audioFraction = chapterAudioFraction(
+            current: progressData?.chapterCurrentSecondsAudio,
+            total: progressData?.chapterTotalSecondsAudio,
+        ) {
             return audioFraction
         }
         return min(max(chapterProgress, 0), 1)
