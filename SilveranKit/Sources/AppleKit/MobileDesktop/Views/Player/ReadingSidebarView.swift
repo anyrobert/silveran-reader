@@ -270,7 +270,7 @@ public struct ReadingSidebarView: View {
                     return draggedSliderValue
                 }
 
-                return min(max(chapterProgress, 0), 1)
+                return displayedChapterProgress
             },
             set: { newValue in
                 let clampedValue = min(max(newValue, 0), 1)
@@ -306,7 +306,7 @@ public struct ReadingSidebarView: View {
                     isDraggingSlider = editing
                     if editing {
                         seekDebounceUntil = nil
-                        draggedSliderValue = min(max(chapterProgress, 0), 1)
+                        draggedSliderValue = displayedChapterProgress
                     } else {
                         seekDebounceUntil = Date().addingTimeInterval(0.5)
                         if !seekWhileDragging {
@@ -332,6 +332,18 @@ public struct ReadingSidebarView: View {
             .foregroundStyle(secondaryColor)
         }
         .padding(.horizontal, 20)
+    }
+
+    private var displayedChapterProgress: Double {
+        if model.isPlaying,
+            let audioFraction = chapterAudioFraction(
+                current: progressData?.chapterCurrentSecondsAudio,
+                total: progressData?.chapterTotalSecondsAudio,
+            )
+        {
+            return audioFraction
+        }
+        return min(max(chapterProgress, 0), 1)
     }
 
     private var transportControls: some View {
